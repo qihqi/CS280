@@ -5,7 +5,7 @@ from keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
 import cv2, numpy as np
 
-TRAIN_ROOT = './data/images/train'
+TRAIN_ROOT = './images/train'
 
 def VGG_16(weights_path=None):
 
@@ -70,9 +70,7 @@ if __name__ == "__main__":
     sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy')
     print model.summary()
-    model.fit_generator(
-        data,
-        samples_per_epoch=200,
-        nb_epoch=50)
-    mode.save('vgg_weights.h5')
-    print np.argmax(out)
+    for i, (X, y) in enumerate(data):
+        print 'minibatch', i
+        model.train_on_batch(X, y)
+    model.save('vgg_weights.h5')

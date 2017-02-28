@@ -1,3 +1,9 @@
+#install nvidia diver
+sudo apt update
+#sudo add-apt-repository ppa:graphics-drivers/ppa
+# sudo apt install nvidia-375
+#wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1604-8-0-local-ga2_8.0.61-1_amd64-deb
+# sudo dpkg -i cuda-repo-ubuntu1604-8-0-local-ga2_8.0.61-1_amd64-deb
 # install theano
 sudo apt-get install python-numpy python-scipy python-dev python-pip python-nose g++ libopenblas-dev git
 sudo pip install Theano
@@ -22,7 +28,8 @@ echo -e "\n[nvcc]\nflags=-D_FORCE_INLINES\n" >> ~/.theanorc
 
 sudo pip install keras
 sudo pip install h5py
+sudo pip install opencv-python
 
 sh get_miniplaces.sh
-python vgg-16_keras.py
+
 
