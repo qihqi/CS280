@@ -31,5 +31,10 @@ sudo pip install h5py
 sudo pip install opencv-python
 
 sh get_miniplaces.sh
+cd data
+mkdir train2
+for x in $(ls train); do
+    cp train/$x/* train2/;
+done
 
 
