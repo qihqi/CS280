@@ -2,77 +2,46 @@ from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
-from keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import DirectoryIterator
 import cv2, numpy as np
+import sys
 
 TRAIN_ROOT = './images/train2'
 
-def VGG_16(weights_path=None):
-
+def cnn2():
     model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=(3,128,128)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(Convolution2D(96, 5, 5, input_shape=(3, 128, 128), activation='relu'))
+    model.add(Convolution2D(96, 5, 5, activation='relu'))
+    model.add(MaxPooling2D((3,3), strides=(2,2)))
+    model.add(Convolution2D(256, 5, 5, activation='relu'))
+    model.add(MaxPooling2D((3,3), strides=(2,2)))
 
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+    model.add(MaxPooling2D((3,3), strides=(2,2)))
 
     model.add(Flatten())
-    model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dense(1000, activation='relu'))
+    model.add(Dense(1000, activation='relu'))
     model.add(Dense(100, activation='softmax'))
-
-    if weights_path:
-        model.load_weights(weights_path)
-
     return model
 
+
 if __name__ == "__main__":
+    images = sys.argv[1] if len(sys.argv) >=2 else TRAIN_ROOT
     gen = ImageDataGenerator()
-    # Test pretrained model
-    # model = VGG_16('vgg16_weights.h5')
-    model = VGG_16()
+    data = gen.flow_from_directory(
+            images, target_size=(128, 128), 
+            class_mode='categorical', batch_size=16)
+
+    model = cnn2()
     sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy')
     print model.summary()
-    for it in range(10):
-        print 'iteration', it
-        data = gen.flow_from_directory(
-                TRAIN_ROOT, target_size=(128, 128), 
-                class_mode='categorical', batch_size=32)
-        for i, (X, y) in enumerate(data):
-            print 'minibatch', i
-            model.train_on_batch(X, y)
-        print 'saving....'
-        model.save('vgg_weights.h5')
+
+    for i, (X, y) in enumerate(data):
+        print model.train_on_batch(X, y)
+        if i % 10000 == 9999:
+            model.save('vgg_weights.h5')
+
