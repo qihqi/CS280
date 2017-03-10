@@ -31,7 +31,12 @@ def cnn2():
 
 if __name__ == "__main__":
     images = sys.argv[1] if len(sys.argv) >=2 else TRAIN_ROOT
-    gen = ImageDataGenerator(samplewise_center=True)
+    gen = ImageDataGenerator(
+            samplewise_center=True, 
+            rotation_range=10, 
+            width_shift_range=0.1, 
+            height_shift_range=0.1,
+            vertical_flip=True)
     data = gen.flow_from_directory(
             images, target_size=(128, 128), 
             class_mode='categorical', batch_size=32,
@@ -45,9 +50,13 @@ if __name__ == "__main__":
         model.compile(optimizer='adam', loss='categorical_crossentropy', 
             metrics=['categorical_crossentropy', 'categorical_accuracy'])
         print 'new model'
-    print model.summary()
-    model.fit_generator(data, samples_per_epoch=100000, nb_epoch=10)
-    model.save('train_weights_snapshotnew.h5')
+#    print model.summary()
+#    print model.evaluate_generator(data, val_samples=10000)
+#    print model.layers
+    for i in range(8):
+        print i
+        model.fit_generator(data, samples_per_epoch=100000, nb_epoch=4)
+        model.save('train_weights_snapshotnew.h5')
 
 #    for i, (X, y) in enumerate(data):
 #        metrics = model.train_on_batch(X, y)
